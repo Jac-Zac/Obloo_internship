@@ -1,91 +1,96 @@
-# import required dependencies
-# https://docs.chainlit.io/integrations/langchain
-import os
-
 import chainlit as cl
-from langchain import hub
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.chains import RetrievalQA
+import PyPDF2
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ChatMessageHistory, ConversationBufferMemory
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
-
-ABS_PATH: str = os.path.dirname(os.path.abspath(__file__))
-DB_DIR: str = os.path.join(ABS_PATH, "dburl")
-
-
-# Set up RetrievelQA model
-rag_prompt_mistral = hub.pull("rlm/rag-prompt-mistral")
-
-
-def load_model():
-    llm = Ollama(
-        model="mistral",
-        verbose=True,
-        callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
-    )
-    return llm
-
-
-def retrieval_qa_chain(llm, vectorstore):
-    qa_chain = RetrievalQA.from_chain_type(
-        llm,
-        retriever=vectorstore.as_retriever(),
-        chain_type_kwargs={"prompt": rag_prompt_mistral},
-        return_source_documents=True,
-    )
-    return qa_chain
-
-
-def qa_bot():
-    llm = load_model()
-    DB_PATH = DB_DIR
-    vectorstore = Chroma(
-        persist_directory=DB_PATH, embedding_function=OllamaEmbeddings(model="mistral")
-    )
-
-    qa = retrieval_qa_chain(llm, vectorstore)
-    return qa
 
 
 @cl.on_chat_start
-async def start():
-    """
-    Initializes the bot when a new chat starts.
+async def on_chat_start():
+    files = None  # Initialize variable to store uploaded files
 
-    This asynchronous function creates a new instance of the retrieval QA bot,
-    sends a welcome message, and stores the bot instance in the user's session.
-    """
-    chain = qa_bot()
-    welcome_message = cl.Message(content="Starting the bot...")
-    await welcome_message.send()
-    welcome_message.content = (
-        "Hi, Welcome to Chat With Documents using Ollama (mistral model) and LangChain."
+    # Wait for the user to upload a file
+    while files is None:
+        files = await cl.AskFileMessage(
+            content="Please upload a pdf file to begin!",
+            accept=["application/pdf"],
+            max_size_mb=100,  # Optionally limit the file size
+            timeout=180,  # Set a timeout for user response,
+        ).send()
+
+    file = files[0]  # Get the first uploaded file
+    print(file)  # Print the file object for debugging
+
+    # Sending an image with the local file path
+    elements = []
+    # Inform the user that processing has started
+    msg = cl.Message(content=f"Processing `{file.name}`...", elements=elements)
+    await msg.send()
+
+    # Read the PDF file
+    pdf = PyPDF2.PdfReader(file.path)
+    pdf_text = ""
+    for page in pdf.pages:
+        pdf_text += page.extract_text()
+
+    # Split the text into chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=50)
+    texts = text_splitter.split_text(pdf_text)
+
+    # Create a metadata for each chunk
+    metadatas = [{"source": f"{i}-pl"} for i in range(len(texts))]
+
+    # Create a Chroma vector store
+    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    docsearch = await cl.make_async(Chroma.from_texts)(
+        texts, embeddings, metadatas=metadatas
     )
-    await welcome_message.update()
+
+    # Initialize message history for conversation
+    message_history = ChatMessageHistory()
+
+    # Memory for conversational context
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        output_key="answer",
+        chat_memory=message_history,
+        return_messages=True,
+    )
+
+    # Create a chain that uses the Chroma vector store
+    chain = ConversationalRetrievalChain.from_llm(
+        ChatOllama(model="mistral"),
+        chain_type="stuff",
+        retriever=docsearch.as_retriever(),
+        memory=memory,
+        return_source_documents=True,
+    )
+
+    # Let the user know that the system is ready
+    msg.content = f"Processing `{file.name}` done. You can now ask questions!"
+    await msg.update()
+    # store the chain in user session
     cl.user_session.set("chain", chain)
 
 
 @cl.on_message
-async def main(message):
-    """
-    Processes incoming chat messages.
-
-    This asynchronous function retrieves the QA bot instance from the user's session,
-    sets up a callback handler for the bot's response, and executes the bot's
-    call method with the given message and callback. The bot's answer and source
-    documents are then extracted from the response.
-    """
+async def main(message: cl.Message):
+    # Retrieve the chain from user session
     chain = cl.user_session.get("chain")
+    # call backs happens asynchronously/parallel
     cb = cl.AsyncLangchainCallbackHandler()
-    cb.answer_reached = True
-    res = await chain.acall(message.content, callbacks=[cb])
-    answer = res["result"]
+
+    # call the chain with user's message content
+    res = await chain.ainvoke(message.content, callbacks=[cb])
+    answer = res["answer"]
     source_documents = res["source_documents"]
 
-    text_elements = []  # type: List[cl.Text]
+    text_elements = []  # Initialize list to store text elements
 
+    # Process source documents if available
     if source_documents:
         for source_idx, source_doc in enumerate(source_documents):
             source_name = f"source_{source_idx}"
@@ -95,9 +100,10 @@ async def main(message):
             )
         source_names = [text_el.name for text_el in text_elements]
 
+        # Add source references to the answer
         if source_names:
             answer += f"\nSources: {', '.join(source_names)}"
         else:
             answer += "\nNo sources found"
-
+    # return results
     await cl.Message(content=answer, elements=text_elements).send()

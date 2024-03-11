@@ -9,6 +9,7 @@ You can see the code of the steps up to the final solution:
 ### Notes:
 
 - [langsmith](https://www.youtube.com/results?search_query=langsmith): used for tracking chats in the future
+- [Create your ollama model from huggingface]()https://www.youtube.com/watch?v=bANziaFj_sA&list=PLz-qytj7eIWWNnbCRxflmRbYI02jZeG0k&index=12
 - chainlit
 
 ### Installation
@@ -41,3 +42,11 @@ chainlit run app.py -w -h
 ```
 
 > Navigate to http://localhost:8000
+
+# Notes about other potential usages:
+
+[Good paper using GNN for predictions](https://arxiv.org/pdf/2105.11537.pdf)
+
+- Edge-augmented Graph Transformer
+
+- Look into this dataset: [they used logistic regression](https://news.crunchbase.com/venture/vc-success-prediction-crunchbase-data-mason-lender/)
