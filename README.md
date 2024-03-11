@@ -6,7 +6,20 @@ You can see the code of the steps up to the final solution:
 
 - [app.py](app.py) - Answers questions, remembers questions, and supports uploaded text files
 
+### Notes:
+
+- [langsmith](https://www.youtube.com/results?search_query=langsmith): used for tracking chats in the future
+- chainlit
+
 ### Installation
+
+- Install [Ollama](https://ollama.com/)
+
+- Install the model we are using:
+
+```bash
+ollama pull mistral
+```
 
 ##### Set up a Python virtual environment
 
