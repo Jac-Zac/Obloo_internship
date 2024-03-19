@@ -50,7 +50,11 @@ chainlit run app.py -w
 
 > Navigate to http://localhost:8000
 
-# Notes about other potential usages:
+You can then try to ask a question such as:
+
+> What could we extract from the moon ? Is there any interesting development ?
+
+## Notes about other potential usages:
 
 I feel like things like AI might be misrepresented by the data
 
