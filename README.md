@@ -20,6 +20,7 @@ You can see the code of the steps up to the final solution:
 
 ```bash
 ollama pull mistral
+ollama pull nomic-embed-text
 ```
 
 ##### Set up a Python virtual environment
@@ -35,10 +36,16 @@ source .env/bin/active
 pip install -r requirements.txt
 ```
 
+#### Create the database
+
+```bash
+python3 create_database.py
+```
+
 #### Run the chatbot:
 
 ```bash
-chainlit run app.py -w -h
+chainlit run app.py -w
 ```
 
 > Navigate to http://localhost:8000
