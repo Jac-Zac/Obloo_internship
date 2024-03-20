@@ -1,15 +1,24 @@
 # Building a chatbot with Chainlit
 
+#### Summary
+
 This code let's you run an LLM through ollama with langchain (we can switch to lamaindex), using the chroma vector database and view the app trough chainlit
+
+#### Code structure
 
 You can see the code of the steps up to the final solution:
 
 - [chat.py](chat.py) - Answers questions, remembers questions, and supports uploaded text files
 
-### Notes:
+- [create_database.py](create_database.py) - Create the embeddings for both pdfs and excel files
+
+### Notes for the future:
 
 - [langsmith](https://www.youtube.com/results?search_query=langsmith): used for tracking chats in the future
+
 - [Create your ollama model from huggingface]()https://www.youtube.com/watch?v=bANziaFj_sA&list=PLz-qytj7eIWWNnbCRxflmRbYI02jZeG0k&index=12
+
+- Look at agents which do things autonomously and also integration of tools instead
 
 ### Installation
 
@@ -36,6 +45,8 @@ pip install -r requirements.txt
 ```
 
 #### Create the database
+
+> Assuming you have a data directory with the files you want to embed inside it
 
 ```bash
 ./create_database.py
