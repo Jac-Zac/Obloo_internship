@@ -11,6 +11,9 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
 
+# Look into function calling
+# https://python.langchain.com/docs/modules/model_io/chat/function_calling
+
 ABS_PATH: str = os.path.dirname(os.path.abspath(__file__))
 DB_DIR: str = os.path.join(ABS_PATH, "db")
 
