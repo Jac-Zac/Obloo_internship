@@ -22,6 +22,7 @@ rag_prompt_mistral = hub.pull("rlm/rag-prompt-mistral")
 def load_model():
     llm = Ollama(
         model="mistral",
+        # streaming=True,
         verbose=True,
         callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
     )
@@ -77,10 +78,12 @@ async def main(message):
     documents are then extracted from the response.
     """
     chain = cl.user_session.get("chain")
-    cb = cl.AsyncLangchainCallbackHandler()
+
+    cb = cl.AsyncLangchainCallbackHandler(stream_final_answer=True)
     cb.answer_reached = True
-    # res=await chain.acall(message, callbacks=[cb])
+
     res = await chain.acall(message.content, callbacks=[cb])
+
     # print(f"response: {res}")
     answer = res["result"]
     # answer = answer.replace(".", ".\n")

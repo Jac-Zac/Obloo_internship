@@ -1,8 +1,15 @@
+import csv
 import os
 import warnings
 
+import pandas as pd
+import xlrd
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
+from langchain_community.document_loaders import (
+    DirectoryLoader,
+    PyPDFLoader,
+    UnstructuredExcelLoader,
+)
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 
@@ -10,6 +17,8 @@ warnings.simplefilter("ignore")
 
 ABS_PATH: str = os.path.dirname(os.path.abspath(__file__))
 DB_DIR: str = os.path.join(ABS_PATH, "db")
+
+DATA_DIR: str = os.path.join(ABS_PATH, "data")
 
 
 # Create vector database
@@ -22,16 +31,19 @@ def create_vector_database():
     and finally persists the embeddings into a Chroma vector database.
 
     """
+
     # Initialize loaders for different file types
-    pdf_loader = DirectoryLoader("data/", glob="**/*.pdf", loader_cls=PyPDFLoader)
+    pdf_loader = DirectoryLoader(DATA_DIR, glob="**/*.pdf", loader_cls=PyPDFLoader)
+    excel_loader = DirectoryLoader(
+        DATA_DIR, glob="**/*.xlsx", loader_cls=UnstructuredExcelLoader
+    )
+
     loaded_documents = pdf_loader.load()
-    # len(loaded_documents)
+    loaded_documents += excel_loader.load()
 
     # Split loaded documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=50)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=100)
     chunked_documents = text_splitter.split_documents(loaded_documents)
-    # len(chunked_documents)
-    # chunked_documents[0]
 
     # Initialize Ollama Embeddings
     ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text")
@@ -44,13 +56,6 @@ def create_vector_database():
     )
 
     vector_database.persist()
-
-    # query it
-    # query = "Who are the authors of the paper"
-    # docs = vector_database.similarity_search(query)
-
-    # print results
-    # print(docs[0].page_content)
 
 
 if __name__ == "__main__":
