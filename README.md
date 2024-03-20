@@ -38,7 +38,7 @@ pip install -r requirements.txt
 #### Create the database
 
 ```bash
-python3 create_database.py
+./create_database.py
 ```
 
 #### Run the chatbot:
