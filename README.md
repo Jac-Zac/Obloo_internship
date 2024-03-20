@@ -31,6 +31,12 @@ ollama pull mistral
 ollama pull nomic-embed-text
 ```
 
+#### Clone the repo and move inside it
+
+```bash
+git clone https://github.com/Jac-Zac/Obloo_internship.git && cd Obloo_internship
+```
+
 ##### Set up a Python virtual environment
 
 ```bash
