@@ -82,7 +82,7 @@ async def main(message):
     cb = cl.AsyncLangchainCallbackHandler(stream_final_answer=True)
     cb.answer_reached = True
 
-    res = await chain.acall(message.content, callbacks=[cb])
+    res = await chain.acall(message.content, callbacks=[cb])  # deprecated
 
     # print(f"response: {res}")
     answer = res["result"]

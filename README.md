@@ -1,16 +1,15 @@
 # Building a chatbot with Chainlit
 
-This code let's you run an LLM through ... With ...
+This code let's you run an LLM through ollama with langchain (we can switch to lamaindex), using the chroma vector database and view the app trough chainlit
 
 You can see the code of the steps up to the final solution:
 
-- [app.py](app.py) - Answers questions, remembers questions, and supports uploaded text files
+- [chat.py](chat.py) - Answers questions, remembers questions, and supports uploaded text files
 
 ### Notes:
 
 - [langsmith](https://www.youtube.com/results?search_query=langsmith): used for tracking chats in the future
 - [Create your ollama model from huggingface]()https://www.youtube.com/watch?v=bANziaFj_sA&list=PLz-qytj7eIWWNnbCRxflmRbYI02jZeG0k&index=12
-- chainlit
 
 ### Installation
 

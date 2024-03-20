@@ -1,17 +1,14 @@
-import csv
 import os
 import warnings
 
-import pandas as pd
-import xlrd
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import (
-    DirectoryLoader,
-    PyPDFLoader,
-    UnstructuredExcelLoader,
-)
+from langchain_community.document_loaders import (DirectoryLoader, PyPDFLoader,
+                                                  UnstructuredExcelLoader)
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
+
+# Look into caching
+# https://python.langchain.com/docs/modules/data_connection/text_embedding/caching_embeddings
 
 warnings.simplefilter("ignore")
 
