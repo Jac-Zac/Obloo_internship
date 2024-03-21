@@ -108,4 +108,4 @@ async def main(message):
         else:
             answer += "\nNo sources found"
 
-    await cl.Message(content=answer, elements=text_elements).send()
+    # await cl.Message(content=answer, elements=text_elements).send()
