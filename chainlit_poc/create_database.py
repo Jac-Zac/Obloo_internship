@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# PyPDF2!/usr/bin/env python
 
 import os
 import warnings

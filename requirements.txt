@@ -11,3 +11,4 @@ unstructured
 networkx
 fake_useragent
 autogenstudio
+PyPDF2
