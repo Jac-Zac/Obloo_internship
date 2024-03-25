@@ -7,6 +7,8 @@ from langchain import hub
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import RetrievalQA
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
@@ -15,28 +17,51 @@ from langchain_community.vectorstores import Chroma
 # https://python.langchain.com/docs/modules/model_io/chat/function_calling
 
 ABS_PATH: str = os.path.dirname(os.path.abspath(__file__))
-DB_DIR: str = os.path.join(ABS_PATH, "db")
-
-
-# Set up RetrievelQA model
-rag_prompt_mistral = hub.pull("rlm/rag-prompt-mistral")
+DB_DIR: str = os.path.join(ABS_PATH, "db_website")
 
 
 def load_model():
     llm = Ollama(
         model="mistral",
-        # streaming=True,
         verbose=True,
         callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
     )
     return llm
 
 
-def retrieval_qa_chain(llm, vectorstore):
+def web_retrival(url):
+    # Load data from the specified URL
+    loader = WebBaseLoader(url)
+    data = loader.load()
+
+    # Split the loaded data
+    text_splitter = CharacterTextSplitter(
+        separator="\n", chunk_size=1000, chunk_overlap=40
+    )
+
+    docs = text_splitter.split_documents(data)
+
+    # Create Ollama embeddings
+    ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+    # Create a Chroma vector database from the documents
+    vectordb = Chroma.from_documents(
+        documents=docs, embedding=ollama_embeddings, persist_directory=DB_DIR
+    )
+
+    vectordb.persist()
+
+    # Create a retriever from the Chroma vector database
+    retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+
+    return retriever
+
+
+def retrieval_qa_chain(llm, retriever):
     qa_chain = RetrievalQA.from_chain_type(
         llm,
-        retriever=vectorstore.as_retriever(),
-        chain_type_kwargs={"prompt": rag_prompt_mistral},
+        retriever=retriever,
+        chain_type="stuff",
         return_source_documents=True,
     )
     return qa_chain
@@ -44,13 +69,10 @@ def retrieval_qa_chain(llm, vectorstore):
 
 def qa_bot():
     llm = load_model()
-    DB_PATH = DB_DIR
-    vectorstore = Chroma(
-        persist_directory=DB_PATH,
-        embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    )
+    # Pass the site
+    retriever = web_retrival("https://en.wikipedia.org/wiki/Rubik's_Cube")
 
-    qa = retrieval_qa_chain(llm, vectorstore)
+    qa = retrieval_qa_chain(llm, retriever)
     return qa
 
 
@@ -65,7 +87,7 @@ async def start():
     chain = qa_bot()
     welcome_message = cl.Message(content="Starting the bot...")
     await welcome_message.send()
-    welcome_message.content = "Hi, this model allows you to chat with your documents using Ollama, Mistral, and Langchain "
+    welcome_message.content = "Ask a question to a website"
     await welcome_message.update()
     cl.user_session.set("chain", chain)
 
@@ -108,4 +130,4 @@ async def main(message):
         else:
             answer += "\nNo sources found"
 
-    await cl.Message(content=answer, elements=text_elements).send()
+    # await cl.Message(content=answer, elements=text_elements).send()

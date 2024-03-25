@@ -6,6 +6,9 @@ This code let's you run an LLM through ollama with langchain (we can switch to l
 
 #### Code structure
 
+- Work with AutoGen Studio (Beta): https://www.youtube.com/watch?v=apEA0oJaFb4
+- Use Microsoft Prompt to make it work
+
 You can see the code of the steps up to the final solution:
 
 - [chat.py](chat.py) - Answers questions, remembers questions, and supports uploaded text files
@@ -13,6 +16,8 @@ You can see the code of the steps up to the final solution:
 - [create_database.py](create_database.py) - Create the embeddings for both pdfs and excel files
 
 ### Notes for the future:
+
+- Switch to Autogen inside chainlit (give them a no code solution)
 
 - [langsmith](https://www.youtube.com/results?search_query=langsmith): used for tracking chats in the future
 
