@@ -102,10 +102,11 @@ async def main(message):
                 cl.Text(content=source_doc.page_content, name=source_name)
             )
         source_names = [text_el.name for text_el in text_elements]
+        context = ", ".join(source_names)
 
-        if source_names:
-            answer += f"\nSources: {', '.join(source_names)}"
-        else:
-            answer += "\nNo sources found"
+        # if source_names:
+        #     answer += f"\nSources: {', '.join(source_names)}"
+        # else:
+        #     answer += "\nNo sources found"
 
-    await cl.Message(content=answer, elements=text_elements).send()
+    await cl.Message(content=context, elements=text_elements).send()
