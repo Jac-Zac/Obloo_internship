@@ -1,5 +1,5 @@
 .env/*
 .chainlit/*
 __pycache__/*
-db/*
-data/*
+**/db/*
+**/data/*
