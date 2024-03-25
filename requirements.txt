@@ -10,4 +10,4 @@ pypdf
 unstructured
 networkx
 fake_useragent
-pyautogen
+autogenstudio
