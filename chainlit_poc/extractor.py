@@ -13,7 +13,7 @@ from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
 
 # Small splitting for documents
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=10)
 
 
 @cl.on_chat_start

@@ -9,6 +9,13 @@ This code let's you run an LLM through ollama with langchain (we can switch to l
 - Work with AutoGen Studio (Beta): https://www.youtube.com/watch?v=apEA0oJaFb4
 - Use Microsoft Prompt to make it work
 
+#### TODO
+
+In SharePoint by Microsoft, there are AI tools available to automate tasks. Specifically, within SharePoint, you can utilize the AI Builder models powered by Microsoft Syntex. These models include Freeform document processing for unstructured documents like contracts and Structured document processing for structured documents such as invoices. These AI Builder models can be applied to SharePoint libraries to process documents automatically, displaying results in new library columns1
+2
+. For Excel automation using AI tools, Power Automate offers capabilities to create AI builders that extract data from Excel documents and output it into another external Excel file. This integration allows for automating repetitive tasks in Excel Desktop by using Office scripts within Power Automate. Users can write scripts or use sample scripts to automate tasks, save them to OneDrive or SharePoint for easy access, and even run them from within Power Automate5
+.
+
 You can see the code of the steps up to the final solution:
 
 - [chat.py](chat.py) - Answers questions, remembers questions, and supports uploaded text files
